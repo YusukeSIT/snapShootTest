@@ -111,7 +111,6 @@ center_uiはもともと中央揃えのコードを実装する予定だった�
 		left: 50%;
 		transform: translate(-50%, 0);
 		bottom: 7%;
-		opacity: 0.6;
 	}
 }
 
@@ -136,4 +135,27 @@ center_uiはもともと中央揃えのコードを実装する予定だった�
 		right: 5%;
 		transform:rotate(-90deg);
 	}
+}
+
+
+.ui a {
+    background-color: #ffffff;
+    color: #303030;
+}
+.ui a:active {
+    color: #ff0000;
+}
+
+#snap {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    visibility: hidden;
+}
+.ui a.disabled {
+    pointer-events: none;
+    color: #cccccc;
+}
+#snap.visible {
+    visibility: visible;
 }
