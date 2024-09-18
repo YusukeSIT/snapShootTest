@@ -1,152 +1,487 @@
 <!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>A-FrameとAR.js - スナップショットを撮る</title>
-    <!-- ① A-Frame を読み込む -->
-    <script src="//aframe.io/releases/0.8.0/aframe.min.js"></script>
-    <!-- ② AR.js を読み込む -->
-    <script src="//jeromeetienne.github.io/AR.js/aframe/build/aframe-ar.js"></script>
-    <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <style>
-        .ui {
-            position: absolute;
-            z-index: 100;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: auto;
-            margin: 0;
-            padding: 10px 15px 30px;
-            text-align: center;
-            box-sizing: border-box;
-        }
-        .ui a {
-            display: inline-block;
-            width: 60px;
-            height: 60px;
-            background-color: #ffffff;
-            line-height: 100%;
-            color: #303030;
-            margin: 10px 3px;
-            border-radius: 50%;
-            position: relative;
+<html>
+	<head>
+		<meta http-equiv="content-type" charset="utf-8">
+		<link rel="stylesheet" href="./data/style.css" type="text/css">
+		<script src="js/aframe-master.1.0.4.min.js"></script>
+		<script src="js/aframe-environment-component.min-old.js"></script>
+		<script src="js/aframe-spe-particles-component.js"></script>
+	   	<script src="js/aframe-spritesheet-animation.js"></script>
+		<script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+		
+		<!--  花火のアニメーション再生に必要  -->
+		<script>
+		AFRAME.registerComponent('cursor-listener', {
+    		init: function () {
+			this.el.addEventListener('raycaster-intersected', evt => {
+   		     this.raycaster = evt.detail.el;
+   		   });
+   		   this.el.addEventListener('raycaster-intersected-cleared', evt => {
+   		     this.raycaster = null;
+   		   });
+  		  },
 
-        }
-        .ui a i {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%,-50%);
-        }
-        .ui a:active {
-            color: #ff0000;
-        }
+  		  // 毎フレームの処理
+  		  tick: function () {
+  		      if (!this.raycaster) { return; }  // Not intersecting.
+  		      let intersection = this.raycaster.components.raycaster.getIntersection(this.el).point;
+  		      if (!intersection) { return; } // Not intersecting
+  		      // 箱の座標を衝突点にセット
+  		      intersection.y += 0.5;
+  		      new_gltf_model.setAttribute('position', intersection);
+  		      //new_box.setAttribute('rotation', cam.getAttribute('rotation'));
+  		  	}
+ 		});
 
-        #snap {
-            max-width: 100%;
-            height: auto;
-            display: block;;
-            visibility: hidden;
-        }
-        .ui a.disabled {
-            pointer-events: none;
-            color: #cccccc;
-        }
-        #snap.visible {
-            visibility: visible;
-        }
-    </style>
+		</script>
+		<script>
 
-</head>
+		
+		function randomNormal(min, max)
+		{
+			let rand = 0;
+			for (let n = 0; n < 6; n++)
+				rand += Math.random();
+			return min + (max - min) * (rand / 6);
+		}
 
-<body style='margin: 0; overflow: hidden;'>
-<!-- ③ シーンを追加 -->
-<a-scene embedded arjs='debugUIEnabled:false;trackingMethod: best;' vr-mode-ui="enabled: false">
-    <a-marker preset='hiro'>
-        <a-box position="0 0.5 0" wireframe="true"></a-box>
-    </a-marker>
+		function randomUniform(min, max)
+		{
+			return min + (max - min) * Math.random();
+		}
 
-    <!-- ⑥ カメラを追加 -->
-    <a-entity camera></a-entity>
-</a-scene>
-<div class="ui">
-    <img id="snap">
-    <a href="#" id="delete-photo" title="Delete Photo" class="disabled"><i class="material-icons">delete</i></a>
-    <a href="" id="take-photo" title="Take Photo"><i class="material-icons">photo_camera</i></a>
-    <a href="#" id="download-photo" download="selfie.png" title="Save Photo" class="disabled" target="_blank"><i class="material-icons">file_download</i></a>
-</div>
-</body>
-<script>
-    var image = document.querySelector('#snap');
-    var take_photo_btn = document.querySelector('#take-photo');
-    var delete_photo_btn = document.querySelector('#delete-photo');
-    var download_photo_btn = document.querySelector('#download-photo');
+		/*
+		AFRAME.registerComponent('spawner', 
+		{
+			init: function()
+			{
+				this.sceneElement = document.querySelector('a-scene');
+			},
 
-    //スナップショットボタン
-    take_photo_btn.addEventListener("click", function (e) {
-        e.preventDefault();
-        var video = document.querySelector('video');
-        var snap = takeSnapshot(video);
+			tick: function(time, deltaTime) // deltaTime: milliseconds
+			{
+				let deltaSeconds = deltaTime/1000;
+				let eventFrequency = 0.75;
 
-        //スナップショット表示.
-        image.setAttribute('src', snap);
-        image.classList.add('visible');
+				if ( Math.random() < eventFrequency * deltaSeconds )
+				{
+					console.log( "Firework!" );
+					let angle = THREE.Math.degToRad(270);
+					let angleSpread = THREE.Math.degToRad(90);
+					let angleRadians = angle + randomNormal(-angleSpread, angleSpread); 
+					let radius = 9;
+					let x = radius * Math.cos(angleRadians);
+					let y = 0;
+					let z = radius * Math.sin(angleRadians);
 
-        // 削除ボタンと保存ボタン有効
-        delete_photo_btn.classList.remove("disabled");
-        download_photo_btn.classList.remove("disabled");
+					let firework = document.createElement("a-entity");
+					firework.setAttribute("firework", "");
+					firework.setAttribute("position", {"x":x, "y":y, "z":z} );
 
-        // 保存ボタンにスナップショットを渡す
-        download_photo_btn.href = snap;
-    });
+					// random flight parameters
+					let maxHeight = randomNormal(4, 8);
+					firework.setAttribute("firework", "maxHeight", maxHeight );
+					let riseTime = randomNormal(2, 3);
+					firework.setAttribute("firework", "riseTime", riseTime );
+					this.sceneElement.appendChild( firework );
 
-    //削除ボタン
-    delete_photo_btn.addEventListener("click", function(e){
+					// chance of multi-firework
+					// 0.10 = 1/10 double, 1/100 triple, 1/1000 quadruple, etc.
+					// 0.20 =  1/5 double,  1/25 triple,  1/125 quadruple, etc.
+					while ( Math.random() < 0.15 )
+					{
+						let fireworkExtra = document.createElement("a-entity");
+						fireworkExtra.setAttribute("firework", "");
+						// synchronize position, height, time to explosion
+						fireworkExtra.setAttribute("position", {"x":x, "y":y, "z":z} );
+						fireworkExtra.setAttribute("firework", "maxHeight", maxHeight );
+						fireworkExtra.setAttribute("firework", "riseTime", riseTime );
+						this.sceneElement.appendChild( fireworkExtra );
+					}
+				}
+			}
+		});
+		*/
 
-        e.preventDefault();
+		AFRAME.registerComponent('firework', 
+		{
+			schema: 
+			{
+				color:  {type: 'string', default: ""},
+				maxHeight: {type: 'number', default: 4.5},
+				riseTime: {type: 'number', default: 2.5}	// time to reach maxHeight
+			},
 
-        // スナップショットを隠す
-        image.setAttribute('src', "");
-        image.classList.remove("visible");
+			randomColor: function()
+			{
+				let colorList = ["red", "orange", "gold", "green", "cyan", "#0088FF", "violet"];
+				let colorIndex = Math.floor( colorList.length * Math.random() );
+				return colorList[colorIndex];
+			},
 
-        // 削除ボタンと保存ボタン無効
-        delete_photo_btn.classList.add("disabled");
-        download_photo_btn.classList.add("disabled");
+			init: function()
+			{	
+				// set random color if none already set
+				if ( this.data.color == "" )
+					this.data.color = this.randomColor();
 
-    });
+				// set up movement animation
+				let p = this.el.object3D.position;
+				this.el.setAttribute("animation__position", "property", "position");
+				this.el.setAttribute("animation__position", "from", {"x":p.x, "y":p.y, "z":p.z});
+				this.el.setAttribute("animation__position", "to", {"x":p.x, "y":p.y + this.data.maxHeight, "z":p.z});
+				this.el.setAttribute("animation__position", "dur", this.data.riseTime * 1000);
+				this.el.setAttribute("animation__position", "easing", "easeOutQuad");  // fast at start, then slower
+				this.el.setAttribute("scale", "3 3 3");
+				
+				// trail effect ----------------------------------------------------------
 
-    //スナップショットを撮る
-    function takeSnapshot(video) {
-        var resizedCanvas = document.createElement("canvas");
-        var resizedContext = resizedCanvas.getContext("2d");
-        var width = video.videoWidth;
-        var height = video.videoHeight;
-        var aScene = document.querySelector("a-scene").components.screenshot.getCanvas("perspective");
+		        this.particleTrail = document.createElement("a-image");
+		        this.particleTrail.setAttribute("position", "0 -0.1 0");
+		        this.particleTrail.setAttribute("width", "0.5");
+		        this.particleTrail.setAttribute("height", "0.5");
+		        this.particleTrail.setAttribute("scale", "0.3 0.3 0.3");
+		        
+		        this.particleTrail.setAttribute("src", "#fireballSheet");
 
-        if (width && height) {
-            //videoのサイズをキャンバスにセット
-            resizedCanvas.width = width;
-            resizedCanvas.height = height;
-            //キャンバスにvideoをコピー
-            resizedContext.drawImage(video, 0, 0, width, height);
+		        this.particleTrail.setAttribute("spritesheet-animation", "rows: 1; columns: 8; frameDuration: 0.08; loop: true;");
 
-            //カメラの画角でar側の縮小処理を変える
-            if (width > height) {
-                // 横長（PC)
-                resizedContext.drawImage(aScene, 0, 0, width, height);
-            } else {
-                // 縦長（スマホ）
-                var scale = height / width;
-                var scaledWidth = height * scale;
-                var marginLeft = (width - scaledWidth) / 2;
-                resizedContext.drawImage(aScene, marginLeft, 0, scaledWidth, height);
-            }
-            return resizedCanvas.toDataURL('image/png');
-        }
-    }
+				this.particleTrail.setAttribute("material", "blending: additive; transparent: true; opacity: 1;");
+				
+				
+		        this.particleTrail.setAttribute("animation__fade", "property", "material.opacity");
+				this.particleTrail.setAttribute("animation__fade", "from", 1.0);
+				this.particleTrail.setAttribute("animation__fade", "to", 0.2);
+				this.particleTrail.setAttribute("animation__fade", "dur", this.data.riseTime * 1000);
+				this.particleTrail.setAttribute("animation__fade", "easing", "easeOutQuad");  // slow at start, then fast
+				
 
-    //-->
-</script>
+		        this.particleTrail.setAttribute("animation__shrink", "property", "scale");
+				this.particleTrail.setAttribute("animation__shrink", "from", "0.3 0.3 0.3");
+				this.particleTrail.setAttribute("animation__shrink", "to", "0.09 0.09 0.09");
+				this.particleTrail.setAttribute("animation__shrink", "dur", this.data.riseTime * 1000);
+				this.particleTrail.setAttribute("animation__shrink", "easing", "easeOutQuad");  // slow at start, then fast
+
+				this.el.appendChild(this.particleTrail);
+
+				// burst effect ----------------------------------------------------------
+
+		        this.particleBurst = document.createElement("a-entity");
+		        this.particleBurst.setAttribute("spe-particles", "");
+
+				this.particleBurst.setAttribute("spe-particles", "texture", "images/particles/sparkle.png");
+				this.particleBurst.setAttribute("spe-particles", "blending", "additive");
+				this.particleBurst.setAttribute("spe-particles", "distribution", "sphere");
+				this.particleBurst.setAttribute("spe-particles", "radius", 0.06);
+				
+				// particles both shrink and fade during last moments
+				this.particleBurst.setAttribute("spe-particles", "opacity", [1, 1, 1, 0]);
+				this.particleBurst.setAttribute("spe-particles", "size", [18, 18, 18, 0]);
+				
+				let particleCount = Math.floor( randomUniform(500, 1100) );
+				this.particleBurst.setAttribute("spe-particles", "particleCount", particleCount);
+
+				// change of particle burst vs. particle stream
+				if ( Math.random() < 0.80 )
+					this.particleBurst.setAttribute("spe-particles", "activeMultiplier", particleCount);
+				else
+					this.particleBurst.setAttribute("spe-particles", "activeMultiplier", particleCount/128);
+				
+				// note: when distribution = 'sphere', only first component of velocity vectors are used
+				let baseVelocity = randomUniform(1, 2);
+				this.particleBurst.setAttribute("spe-particles", "velocity", {"x":baseVelocity, "y":0, "z":0});
+				this.particleBurst.setAttribute("spe-particles", "velocitySpread", {"x":0.5, "y":0, "z":0});
+				this.particleBurst.setAttribute("spe-particles", "drag", 1.00);
+				this.particleBurst.setAttribute("spe-particles", "randomizeVelocity", true);
+				
+				// add a bit of gravity
+				this.particleBurst.setAttribute("spe-particles", "accelerationDistribution", "box");
+				this.particleBurst.setAttribute("spe-particles", "acceleration", {"x":0, "y":-0.2, "z":0});
+				this.particleBurst.setAttribute("spe-particles", "accelerationSpread", {"x":0, "y":0.2, "z":0});
+				
+				// how long will particles last?
+		        this.burstDuration = randomUniform(1.0, 3.0);
+		        this.particleBurst.setAttribute("spe-particles", "maxAge", this.burstDuration);
+		        this.particleBurst.setAttribute("spe-particles", "maxAgeSpread", this.burstDuration/4);
+		        // duration = maximum amount of time to emit particles;
+		        //        	  should be less than smallest max age to prevent second burst
+				this.particleBurst.setAttribute("spe-particles", "duration", 0.5);
+
+				// default: steady color
+				let colorArray = ["white", this.data.color, this.data.color, this.data.color];
+				// random chance of color shifting
+				if ( Math.random() < 0.25 )
+				{
+					let color2 = this.data.color;
+					// make sure second color is different from first
+					while (color2 == this.data.color)
+					{
+						color2 = this.randomColor();
+					}
+					colorArray = ["white", this.data.color, color2, color2];
+				}
+		        this.particleBurst.setAttribute("spe-particles", "color", colorArray);
+
+		        // disable burst effect for now;
+		        //   will be enabled (in tick method) after reaching max height
+				this.particleBurst.setAttribute("spe-particles", "enabled", false);
+
+		  		this.el.appendChild(this.particleBurst);
+
+				this.elapsedTime = 0;
+				this.burstStart = false;
+			},
+			
+			tick: function(time, deltaTime)
+			{
+				this.elapsedTime += deltaTime/1000;
+
+				// firework has reached max height, start burst effect
+				if (this.elapsedTime > this.data.riseTime && this.burstStart == false)
+				{
+					this.burstStart = true;
+					this.particleBurst.setAttribute("spe-particles", "enabled", true);
+
+					this.el.removeChild( this.particleTrail );
+
+				}
+
+				// firework finished; remove self from scene
+				//  need to take into account particle age variation (1.25 factor)
+				if (this.elapsedTime > this.data.riseTime + this.burstDuration * 1.25)
+				{
+					let element = this.el;
+		      		element.parentNode.removeChild(element);
+				}
+			}
+		});
+
+		/*
+		// runs when user clicks button
+		AFRAME.registerComponent('start', 
+		{
+			init: function()
+			{
+				// block pointer events until buttonEnter is clicked
+				let uiDiv = document.getElementById("uiDiv");
+				uiDiv.style["pointer-events"] = "auto";
+
+				// set up background blocker
+				uiDiv.style["background-color"] = "rgba(0, 0, 0, 0.75)";
+
+				// indicate clickable with hand cursor (desktop)
+				let buttonEnter = document.getElementById("buttonEnter");
+				buttonEnter.style.cursor = "pointer";
+
+				// fade-in functionality
+				let fadeIn = function()
+				{
+					// allow point events again
+					uiDiv.style["pointer-events"] = "none";
+
+					// remove startButton
+					buttonEnter.parentNode.remove(buttonEnter);
+
+					// fade out uiDiv background
+					uiDiv.style["background-color"] = "rgba(0, 0, 0, 0.0)";
+		    		uiDiv.style["transition"] = "background-color 1000ms linear";
+
+		    		// activate the spawner
+					let camera = document.querySelector("#camera");
+					camera.setAttribute("spawner", "");
+				}
+
+				// activate for desktop/touchscreen
+				buttonEnter.addEventListener('touchstart', fadeIn);
+				buttonEnter.addEventListener('mousedown',  fadeIn);
+			}
+		});
+		*/
+		</script>
+
+	</head>
+
+	<!--ズームなどの一部動作の制限-->
+	<body style="touch-action:none">
+
+		<!--iOSにおいてDeviceMotion取得するために、ユーザーに画面タッチを強制-->
+		<div id="ui" class="permission_ui">
+			<p id="discription" class="permission_ui center_ui">画面をタッチしてください</p>
+		</div>
+
+		<!--3D空間-->
+		
+		<!--
+		permission_uiを優先するために初期状態では表示しない
+		device-orientation-permission-uiをfalseにすることでa-frameにデフォルトで搭載されているDeviceMotion取得用UIを無視
+		embedded arjsでarモードを有効化
+		vr-mode-uiをfalseにすることで右下の謎のボタンを削除(Androidだとできてない？)
+		id="main"は今のところ意味なし
+		-->
+		<a-scene id="main" device-orientation-permission-ui="enabled: false" embedded arjs vr-mode-ui="enabled: false;" style="display: none; position: static;">	
+			<a-assets>
+				<img id="fireball" src="images/fireball.png"/>	
+				<img id="fireballSheet" src="images/fireball-up.png"/>
+		  	</a-assets>
+			<a-entity id='camera' camera look-controls="touchEnabled: false;" wasd-controls position="0 8 0"></a-entity>
+				
+				<!--移動オブジェクトの移動先の取得-->
+			<a-entity cursor="rayOrigin: mouse" raycaster="objects: #target;"></a-entity> 
+
+			<!--rayの衝突用-->
+			<a-plane cursor-listener id="target" rotation = "-90 0 0" position="0 -5 0" scale="500 500 1" color = "red" opacity = "0"></a-plane>
+			
+		</a-scene>
+
+		<!--
+		FIRE!!!!!!
+		<input type = "button" id = "b1" value = "打ち上げ" onclick = "tenka();" style="display:none">
+		-->
+		<div id="SideUIWrapper" style="display:none">
+			
+			<div id="SideUI">
+				<ul>
+					<h3>設定</h3>
+					<!--没
+					<li>
+						<p>画面の向き</p>
+						<label><input type="radio" name="display" value="横画面">横画面</label>
+						<label><input type="radio" name="display" value="縦画面" checked>縦画面</label>
+					</li>
+					-->
+					<li>
+						<p>筒の間隔</p>
+						<input id="width" type="number" min="1" max="10" value="1">
+					</li>
+					<li>
+						<p>筒の数</p>
+						<input id="pNumber" type="number" min="1" max="20" value="7">
+					</li>
+					<li>
+						<div id="freq">
+							<p>発射頻度</p>
+							<label><input type="radio" name="frequency" value="1.0" checked>x1</label>
+							<label><input type="radio" name="frequency" value="2.0">x2</label>
+							<label><input type="radio" name="frequency" value="3.0">x3</label>
+						</div>
+					</li>
+					<li>
+						<p>発射装置の表示切替</p>
+						<label><input id="visible" type="checkbox" name="visibility" value="visible">表示</label>
+					</li>
+				</ul>
+			</div>
+			<input id="UIVisibilityButton" type="button" value="≪" onclick="changeUI();">
+
+		</div>
+
+
+		<div class="ui" id="shutter" style="display:none">
+		    <img id="snap">
+		    <a href="#" id="delete-photo" title="Delete Photo" class="disabled"><i class="material-icons">delete</i></a>
+		    <a href="" id="take-photo" title="Take Photo"><i class="material-icons">photo_camera</i></a>
+		    <a href="#" id="download-photo" download="selfie.png" title="Save Photo" class="disabled" target="_blank"><i class="material-icons">file_download</i></a>
+		</div>
+		<!--仮UI-->
+
+
+		<!--JS用-->
+		<script>
+		var pNumber = 7;
+		var pipes = [];
+		var childs = [];
+		var frequ = 1.0;
+		var pWidth = 1.0;
+
+		function createPipes() {
+			for (let i = 0; i < pNumber; i++) {
+
+				new_gltf_model = document.createElement('a-gltf-model');
+				new_gltf_model.setAttribute('id', 'i');
+				new_gltf_model.setAttribute('class', 'device pipes');
+				//new_gltf_model.setAttribute('dynamic-body', 'shape: cube; mass: 1');
+				new_gltf_model.setAttribute('scale', '0.6 0.6 0.6');
+				new_gltf_model.setAttribute('position', '0 0 0');
+				new_gltf_model.setAttribute('src', '#model-tube');
+
+				pipes.push(new_gltf_model);
+
+				pipes[i].setAttribute('id', i);
+				document.querySelector('a-scene').appendChild(pipes[i]);
+
+				let bool = true;
+				childs.push(bool);
+			}
+		}
+
+		function deletePipes() {
+			let delElements = document.getElementsByClassName('pipes');
+			for (let i = 0; i < pNumber; i++) {
+				delElements[0].remove();
+			}
+			pipes = [];
+			childs = [];
+		}
+
+		createPipes();
+
+		
+
+
+		AFRAME.registerComponent('box-colider', {
+			tick: function () {
+				let pos = this.el.getAttribute('position');
+				for (let i = 0; i < pNumber; i++) {
+
+					let p = pipes[i].getAttribute('position');
+
+					p.x = pos.x - 0.03 + (0.38 * pWidth * i);
+					p.y = pos.y;
+					p.z = pos.z - 0.01;
+					pipes[i].setAttribute('position', p);
+				}
+			}
+		});
+
+		function tenka() {
+			let ranNum = Math.floor(Math.random() * pNumber);
+			let ranWait = Math.random() * 2500;
+			ranWait = ranWait / frequ;
+			/*
+			let col;
+			if (ranNum % 3 == 0) {
+				col = '#ff7d7d';
+			} else if (ranNum % 3 == 1) {
+				col = '#7d7dff';
+			} else {
+				col = '#7dff7d'
+			}
+			*/
+
+			if (childs[ranNum] == true) {
+				//hanabi(pipes[ranNum].getAttribute('position').x - 0.38*3, pipes[ranNum].getAttribute('position').y, pipes[ranNum].getAttribute('position').z, col);
+				let x = pipes[ranNum].getAttribute('position').x - 0.38*3;
+				let y = pipes[ranNum].getAttribute('position').y + 0.6;
+				let z = pipes[ranNum].getAttribute('position').z;
+
+				let firework = document.createElement("a-entity");
+				firework.setAttribute("firework", "");
+				firework.setAttribute("position", {"x":x, "y":y, "z":z} );
+
+				// random flight parameters
+				let maxHeight = randomNormal(16, 20);
+				firework.setAttribute("firework", "maxHeight", maxHeight );
+				let riseTime = randomNormal(4, 5);
+				firework.setAttribute("firework", "riseTime", riseTime );
+				document.getElementById('main').appendChild( firework );
+				}
+
+			setTimeout(() => {tenka()}, ranWait);
+		}
+		document.addEventListener("click", tenka(), true);
+		</script>
+		<script src="./data/tsts.js"></script>
+		<script src="data/uiController.js"></script>
+
+	</body>
 </html>
