@@ -108,7 +108,7 @@ center_uiはもともと中央揃えのコードを実装する予定だった�
 @media screen and (orientation:portrait) {
 	#shutter {
 		position: absolute;
-		left: 60%;
+		left: 55%;
 		transform: translate(-50%, 0);
 		bottom: 7%;
 	}
@@ -153,7 +153,7 @@ center_uiはもともと中央揃えのコードを実装する予定だった�
 #snap {
     max-width: 100%;
     height: auto;
-    display: block;
+    display: none;
     visibility: hidden;
 }
 .ui img.disabled {
@@ -162,4 +162,5 @@ center_uiはもともと中央揃えのコードを実装する予定だった�
 }
 #snap.visible {
     visibility: visible;
+    display: block;
 }

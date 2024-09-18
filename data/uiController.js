@@ -54,12 +54,12 @@ DeviceVisible.addEventListener('input', function() {
 	let devices = document.getElementsByClassName('device');
 	if (DeviceVisible.checked) {
 		for (let i = 0; i < devices.length; i++) {
-			devices[i].setAttribute('opacity', '1');
+			devices[i].setAttribute('visible', 'true');
 		}
 	}
 	else {
 		for (let i = 0; i < devices.length; i++) {
-			devices[i].setAttribute('opacity', '0');
+			devices[i].setAttribute('visible', 'false');
 		}
 	}
 });
