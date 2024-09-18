@@ -108,7 +108,7 @@ center_uiはもともと中央揃えのコードを実装する予定だった�
 @media screen and (orientation:portrait) {
 	#shutter {
 		position: absolute;
-		left: 50%;
+		left: 55%;
 		transform: translate(-50%, 0);
 		bottom: 7%;
 	}
@@ -130,19 +130,23 @@ center_uiはもともと中央揃えのコードを実装する予定だった�
 @media screen and (orientation:landscape) {
 	#shutter {
 		position: absolute;
-		top: 50%;
+		top: 45%;
 		transform: translate(0, -50%);
 		right: 5%;
 		transform:rotate(-90deg);
 	}
 }
+@media screen and (orientation:landscape) {
+	#shutter img{
+		transform:rotate(90deg);
+	}
+}
 
 
-.ui a {
-    background-color: #ffffff;
+.ui img {
     color: #303030;
 }
-.ui a:active {
+.ui img:active {
     color: #ff0000;
 }
 
@@ -152,7 +156,7 @@ center_uiはもともと中央揃えのコードを実装する予定だった�
     display: block;
     visibility: hidden;
 }
-.ui a.disabled {
+.ui img.disabled {
     pointer-events: none;
     color: #cccccc;
 }
