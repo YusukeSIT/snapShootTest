@@ -398,15 +398,15 @@
 		function createPipes() {
 			for (let i = 0; i < pNumber; i++) {
 
-				new_gltf_model = document.createElement('a-gltf-model');
-				new_gltf_model.setAttribute('id', 'i');
-				new_gltf_model.setAttribute('class', 'device pipes');
+				new_gltf_model2 = document.createElement('a-gltf-model');
+				new_gltf_model2.setAttribute('id', 'i');
+				new_gltf_model2.setAttribute('class', 'device pipes');
 				//new_gltf_model.setAttribute('dynamic-body', 'shape: cube; mass: 1');
-				new_gltf_model.setAttribute('scale', '0.6 0.6 0.6');
-				new_gltf_model.setAttribute('position', '0 0 0');
-				new_gltf_model.setAttribute('src', '#model-tube');
+				new_gltf_model2.setAttribute('scale', '0.6 0.6 0.6');
+				new_gltf_model2.setAttribute('position', '0 0 0');
+				new_gltf_model2.setAttribute('src', '#model-tube');
 
-				pipes.push(new_gltf_model);
+				pipes.push(new_gltf_model2);
 
 				pipes[i].setAttribute('id', i);
 				document.querySelector('a-scene').appendChild(pipes[i]);
