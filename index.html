@@ -477,7 +477,7 @@
 
 					let p = pipes[i].getAttribute('position');
 
-					p.x = pos.x - 0.38 * bxp + (0.38 * pWidth * i);
+					p.x = pos.x - 0.03 - 0.38 * (bxp-1) + (0.38 * pWidth * i);
 					p.y = pos.y;
 					p.z = pos.z - 0.01;
 					pipes[i].setAttribute('position', p);
