@@ -451,7 +451,7 @@
 
 				//木枠の横幅調整
 				bx = 0.6 / 7 * pNumber * pWidth;
-				bxr = bx / 0.6;
+				bxp = bx / 0.6;
 				new_gltf_model.setAttribute('scale', bx + ' 0.6 0.6');
 			}
 		}
@@ -477,7 +477,7 @@
 
 					let p = pipes[i].getAttribute('position');
 
-					p.x = pos.x - 0.03 * bxp + (0.38 * pWidth * i);
+					p.x = pos.x - 0.38 * bxp + (0.38 * pWidth * i);
 					p.y = pos.y;
 					p.z = pos.z - 0.01;
 					pipes[i].setAttribute('position', p);
