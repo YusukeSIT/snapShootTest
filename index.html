@@ -394,6 +394,7 @@
 		var childs = [];
 		var frequ = 1.0;
 		var pWidth = 1.0;
+		var bx = 0.6;
 
 		function createPipes() {
 			for (let i = 0; i < pNumber; i++) {
@@ -413,6 +414,10 @@
 
 				let bool = true;
 				childs.push(bool);
+
+				//木枠の横幅調整
+				bx = 0.6 / 7 * pNumber * pWidth;
+				new_gltf_model.setAttribute('scale', bx + ' 0.6 0.6');
 			}
 		}
 
